@@ -51,6 +51,12 @@ class DocumentActionsMenu extends \hiqdev\yii2\menus\Menu
                 'url' => ['@document/update', 'id' => $this->model->id],
                 'visible' => Yii::$app->user->can('document.update') && $this->model->state !== 'deleted',
             ],
+            'replace' => [
+                'label' => Yii::t('hipanel:document', 'Replace'),
+                'icon' => 'fa-exchange',
+                'url' => ['@document/replace', 'id' => $this->model->id],
+                'visible' => Yii::$app->user->can('document.replace') && $this->model->state !== 'deleted',
+            ],
             'delete' => [
                 'label' => Yii::t('hipanel', 'Delete'),
                 'icon' => 'fa-trash',

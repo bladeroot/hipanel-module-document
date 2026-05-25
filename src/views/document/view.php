@@ -1,13 +1,16 @@
 <?php
 
 /**
- * @var \hipanel\modules\document\models\Document
+ * @var \yii\web\View $this
+ * @var \hipanel\modules\document\models\Document $model
  * @var \hipanel\modules\document\models\Document[] $models
  * @var array $types
  * @var array $states
+ * @var array $fileHistory
  */
 use hipanel\modules\document\grid\DocumentGridView;
 use hipanel\modules\document\menus\DocumentDetailMenu;
+use hipanel\widgets\AuditButton;
 use hipanel\widgets\Box;
 use yii\helpers\Html;
 
@@ -41,6 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
         </p>
         <div class="profile-usermenu">
             <?= DocumentDetailMenu::widget(['model' => $model]) ?>
+            <?= AuditButton::widget(['model' => $model, 'linkOptions' => ['class' => 'list-group-item']]) ?>
         </div>
         <?php Box::end() ?>
     </div>
@@ -65,5 +69,42 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php $box->endBody() ?>
         <?php $box->end() ?>
 
+        <?php if (Yii::$app->user->can('document.see-history') && !empty($fileHistory)): ?>
+            <?php $box = Box::begin([
+                'renderBody' => false,
+                'title' => Yii::t('hipanel:document', 'File replacement history'),
+            ]) ?>
+            <?php $box->beginBody() ?>
+            <table class="table table-condensed table-hover">
+                <thead>
+                    <tr>
+                        <th><?= Yii::t('hipanel:document', 'File') ?></th>
+                        <th><?= Yii::t('hipanel:document', 'Size') ?></th>
+                        <th><?= Yii::t('hipanel:document', 'Valid till') ?></th>
+                        <th><?= Yii::t('hipanel:document', 'Replaced by') ?></th>
+                        <th><?= Yii::t('hipanel:document', 'Reason') ?></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($fileHistory as $entry): ?>
+                    <tr>
+                        <td><?= Html::encode($entry['filename']) ?></td>
+                        <td><?= Yii::$app->formatter->asShortSize($entry['size']) ?></td>
+                        <td><?= Yii::$app->formatter->asDatetime($entry['replaced_at']) ?></td>
+                        <td><?= Html::encode($entry['client']) ?></td>
+                        <td><?= Html::encode($entry['reason']) ?></td>
+                        <td><?= Html::a(
+                            Html::tag('i', '', ['class' => 'fa fa-download']) . ' ' . Yii::t('hipanel:document', 'Download'),
+                            ['/file/download', 'id' => $entry['file_id']],
+                            ['class' => 'btn btn-xs btn-default']
+                        ) ?></td>
+                    </tr>
+                    <?php endforeach ?>
+                </tbody>
+            </table>
+            <?php $box->endBody() ?>
+            <?php $box->end() ?>
+        <?php endif ?>
     </div>
 </div>
