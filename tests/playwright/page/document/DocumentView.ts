@@ -5,7 +5,7 @@ export default class DocumentView {
   private readonly historyBoxLocator: Locator;
 
   constructor(private readonly page: Page) {
-    this.detailMenu = page.locator(".profile-usermenu .list-group");
+    this.detailMenu = page.locator(".profile-usermenu .nav");
     this.historyBoxLocator = page.locator('.box:has(.box-title:has-text("File replacement history"))');
   }
 
@@ -13,6 +13,17 @@ export default class DocumentView {
     await this.page.goto("/document/document/index");
     await this.page.locator('a[href*="/document/document/view"]').first().click();
     await this.page.waitForURL("**/document/document/view**");
+  }
+
+  async gotoFirstDocumentOrSkip(): Promise<boolean> {
+    await this.page.goto("/document/document/index");
+    const firstLink = this.page.locator('a[href*="/document/document/view"]').first();
+    if (await firstLink.count() === 0) {
+      return false;
+    }
+    await firstLink.click();
+    await this.page.waitForURL("**/document/document/view**");
+    return true;
   }
 
   replaceButton(): Locator {
