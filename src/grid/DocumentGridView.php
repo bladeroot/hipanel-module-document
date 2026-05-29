@@ -123,7 +123,7 @@ class DocumentGridView extends BoxedGridView
                 'label' => Yii::t('hipanel:document', 'Related object'),
                 'format' => 'raw',
                 'value' => function ($model) {
-                    return DocumentRelationWidget::widget(['model' => $model->object]);
+                    return DocumentRelationWidget::widget(['model' => $model->isRelationPopulated('object') ? $model->object : null]);
                 },
             ],
             'status' => [
