@@ -96,7 +96,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <td><?= Html::encode($entry['reason']) ?></td>
                         <td><?= Html::a(
                             Html::tag('i', '', ['class' => 'fa fa-download']) . ' ' . Yii::t('hipanel:document', 'Download'),
-                            ['/file/download', 'id' => $entry['file_id']],
+                            ['/file/get', 'id' => $entry['file_id']],
                             ['class' => 'btn btn-xs btn-default']
                         ) ?></td>
                     </tr>

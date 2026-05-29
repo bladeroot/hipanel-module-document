@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { expect, Page } from "@playwright/test";
 import { Alert } from "@hipanel-core/shared/ui/components";
 
@@ -14,7 +16,15 @@ export default class DocumentReplaceForm {
   }
 
   async uploadFile(filePath: string): Promise<void> {
-    await this.page.locator("#document-attachment").setInputFiles(filePath);
+    const buffer = Buffer.concat([
+      fs.readFileSync(filePath),
+      Buffer.from(`\n% unique:${Date.now()}\n`),
+    ]);
+    await this.page.locator("#document-attachment").setInputFiles({
+      name: path.basename(filePath),
+      mimeType: "application/pdf",
+      buffer,
+    });
   }
 
   async fillReason(reason: string): Promise<void> {
@@ -30,8 +40,7 @@ export default class DocumentReplaceForm {
   }
 
   async assertReasonRequired(): Promise<void> {
-    await expect(this.page.locator(".field-document-reason")).toHaveClass(/has-error/);
-    await expect(this.page.locator(".field-document-reason .help-block")).toContainText("cannot be blank");
+    await expect(this.page.locator("#document-reason:invalid")).toBeAttached();
     await expect(this.page).toHaveURL(/\/document\/replace/);
   }
 

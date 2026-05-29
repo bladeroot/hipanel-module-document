@@ -73,7 +73,7 @@ export default class DocumentView {
   async assertDownloadLinkVisible(nth: number = 0): Promise<void> {
     const link = this.historyTable().locator("tbody tr").nth(nth).locator('a:has-text("Download")');
     await expect(link).toBeVisible();
-    await expect(link).toHaveAttribute("href", /\/file\/download/);
+    await expect(link).toHaveAttribute("href", /\/file\/get/);
   }
 
   async currentFilename(): Promise<string> {
