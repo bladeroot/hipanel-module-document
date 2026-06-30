@@ -65,8 +65,10 @@ class DocumentController extends CrudController
                 'on beforePerform' => function ($event) {
                     /** @var ViewAction $action */
                     $action = $event->sender;
-
-                    $action->getDataProvider()->query->details()->showDeleted();
+                    $query = $action->getDataProvider()->query->details()->showDeleted();
+                    if (Yii::$app->user->can('bill.charges.read')) {
+                        $query->withCharges();
+                    }
                 },
                 'data' => fn() => $this->getAdditionalData(),
             ],

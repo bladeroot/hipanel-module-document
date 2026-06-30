@@ -1,14 +1,16 @@
 <?php
 
 /**
- * @var \hipanel\modules\document\models\Document
+ * @var \hipanel\modules\document\models\Document $model
  * @var \hipanel\modules\document\models\Document[] $models
  * @var array $types
  * @var array $states
  */
 use hipanel\modules\document\grid\DocumentGridView;
 use hipanel\modules\document\menus\DocumentDetailMenu;
+use hipanel\modules\finance\grid\ChargeGridView;
 use hipanel\widgets\Box;
+use yii\data\ArrayDataProvider;
 use yii\helpers\Html;
 
 $this->title = Html::encode($model->getDisplayTitle());
@@ -66,4 +68,28 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php $box->end() ?>
 
     </div>
+
 </div>
+
+<?php $charges = $model->chargeModels; ?>
+<?php if (!empty($charges)): ?>
+<div class="row">
+    <div class="col-md-12">
+        <?= ChargeGridView::widget([
+            'dataProvider' => new ArrayDataProvider(['allModels' => $charges, 'pagination' => false]),
+            'boxed' => true,
+            'layout' => '{items}',
+            'columns' => [
+                'id',
+                'bill_id',
+                'type_label',
+                'name',
+                'sum',
+                'quantity',
+                'is_payed',
+                'time',
+            ],
+        ]) ?>
+    </div>
+</div>
+<?php endif ?>
