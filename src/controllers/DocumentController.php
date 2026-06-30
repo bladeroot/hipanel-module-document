@@ -22,6 +22,8 @@ use hipanel\modules\document\models\Document;
 use hipanel\modules\finance\actions\GenerateDocumentAction;
 use hiqdev\hiart\ResponseErrorException;
 use Yii;
+use yii\db\BaseActiveRecord;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 /**
@@ -38,6 +40,7 @@ class DocumentController extends CrudController
                     'create,import,copy'    => 'document.create',
                     'update'                => 'document.update',
                     'delete'                => 'document.delete',
+                    'replace'               => 'document.replace',
                     '*'                     => 'document.read',
                 ],
             ],
@@ -70,7 +73,20 @@ class DocumentController extends CrudController
                         $query->withCharges();
                     }
                 },
-                'data' => fn() => $this->getAdditionalData(),
+                'data' => function () {
+                    $data = $this->getAdditionalData();
+                    $id = Yii::$app->request->get('id');
+                    $fileHistory = [];
+                    if ($id && Yii::$app->user->can('document.see-history')) {
+                        try {
+                            $fileHistory = Document::perform('get-file-history', ['id' => $id]);
+                        } catch (ResponseErrorException) {
+                            $fileHistory = [];
+                        }
+                    }
+                    $data['fileHistory'] = is_array($fileHistory) ? $fileHistory : [];
+                    return $data;
+                },
             ],
             'update' => [
                 'class' => SmartUpdateAction::class,
@@ -121,6 +137,38 @@ class DocumentController extends CrudController
 
             $action->getDataProvider()->query->details();
         };
+    }
+
+    public function actionReplace(int $id): Response|string
+    {
+        $models = Document::find()->where(['id' => $id])->details()->all();
+        $model = reset($models);
+        if (!$model) {
+            throw new NotFoundHttpException();
+        }
+        $model->scenario = Document::SCENARIO_REPLACE;
+
+        if (Yii::$app->request->isPost) {
+            if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+                // Trigger FileBehavior to upload the file and populate file_id.
+                $model->trigger(BaseActiveRecord::EVENT_BEFORE_UPDATE);
+
+                try {
+                    Document::perform('replace-file', [
+                        'id'      => $model->id,
+                        'file_id' => $model->file_id,
+                        'reason'  => $model->reason,
+                    ]);
+                    Yii::$app->session->setFlash('success', Yii::t('hipanel:document', 'Document file was replaced'));
+
+                    return $this->redirect(['@document/view', 'id' => $model->id]);
+                } catch (ResponseErrorException $e) {
+                    Yii::$app->session->setFlash('error', $e->getMessage());
+                }
+            }
+        }
+
+        return $this->render('replace', ['model' => $model]);
     }
 
     public function actionArchive()

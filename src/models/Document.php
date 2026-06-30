@@ -33,6 +33,9 @@ class Document extends \hipanel\base\Model
     const SCENARIO_CREATE = 'create';
     const SCENARIO_UPDATE = 'update';
     const SCENARIO_DELETE = 'delete';
+    const SCENARIO_REPLACE = 'replace';
+
+    public string $reason = '';
 
     /**
      * {@inheritdoc}
@@ -49,7 +52,7 @@ class Document extends \hipanel\base\Model
                 'class' => FileBehavior::class,
                 'attribute' => 'attachment',
                 'targetAttribute' => 'file_id',
-                'scenarios' => ['create'],
+                'scenarios' => ['create', 'replace'],
             ],
             [
                 'class' => JsonBehavior::class,
@@ -93,7 +96,10 @@ class Document extends \hipanel\base\Model
                 'enableClientValidation' => false,
                 'when' => fn(): bool => Yii::$app->user->can('document.update'),
             ],
-            [['id'], 'required', 'on' => ['update', 'delete']],
+            [['id'], 'required', 'on' => ['update', 'delete', 'replace']],
+            [['attachment'], 'safe', 'on' => ['replace']],
+            [['reason'], 'required', 'on' => 'replace'],
+            [['reason'], 'string', 'on' => 'replace'],
             [['data'], JsonValidator::class],
             [['templateid', 'template_name'], 'string'],
         ];
@@ -105,13 +111,14 @@ class Document extends \hipanel\base\Model
     public function attributeLabels()
     {
         return $this->mergeAttributeLabels([
-            'type_id' => Yii::t('hipanel', 'Type'),
-            'attachment' => Yii::t('hipanel:document', 'File'),
+            'type_id'     => Yii::t('hipanel', 'Type'),
+            'attachment'  => Yii::t('hipanel:document', 'File'),
             'status_types' => Yii::t('hipanel:document', 'Statuses'),
-            'sender_id' => Yii::t('hipanel:document', 'Sender'),
+            'sender_id'   => Yii::t('hipanel:document', 'Sender'),
             'receiver_id' => Yii::t('hipanel:document', 'Receiver'),
             'requisite_id' => Yii::t('hipanel:finance', 'Requisite'),
-            'requisite' => Yii::t('hipanel:finance', 'Requisite'),
+            'requisite'   => Yii::t('hipanel:finance', 'Requisite'),
+            'reason'      => Yii::t('hipanel:document', 'Reason for replacement'),
         ]);
     }
 
