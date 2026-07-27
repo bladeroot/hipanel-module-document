@@ -14,6 +14,7 @@ use hipanel\base\ModelTrait;
 use hipanel\behaviors\File as FileBehavior;
 use hipanel\models\File;
 use hipanel\modules\document\models\query\DocumentQuery;
+use hipanel\modules\finance\models\Charge;
 use hipanel\behaviors\JsonBehavior;
 use hipanel\behaviors\JsonValidator;
 use Yii;
@@ -67,7 +68,7 @@ class Document extends \hipanel\base\Model
     {
         return [
             [['id', 'type_id', 'state_id', 'object_id', 'client_id', 'seller_id'], 'integer'],
-            [['client', 'seller', 'title', 'description', 'class'], 'safe'],
+            [['client', 'seller', 'title', 'description', 'class', 'charges'], 'safe'],
             [['create_time', 'update_time'], 'safe'],
             [['type', 'type_label', 'state', 'object_id', 'requisite_id', 'requisite', 'data_location', 'data_bill_id'], 'safe'],
             [['filename', 'sender', 'receiver', 'number'], 'string'],
@@ -134,6 +135,16 @@ class Document extends \hipanel\base\Model
     public function getStatuses()
     {
         return $this->hasMany(Status::class, ['object_id' => 'id']);
+    }
+
+    /** @return Charge[] */
+    public function getChargeModels(): array
+    {
+        return array_map(function (array $attrs): Charge {
+            $charge = new Charge();
+            $charge->setAttributes($attrs, false);
+            return $charge;
+        }, $this->charges ?? []);
     }
 
     public function isVerified()

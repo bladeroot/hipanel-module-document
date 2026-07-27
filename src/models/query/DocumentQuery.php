@@ -32,4 +32,11 @@ class DocumentQuery extends ActiveQuery
     {
         return $this->andWhere(['id' => $id]);
     }
+
+    public function withCharges(): self
+    {
+        $this->andWhere(['with_charges' => true]);
+
+        return $this;
+    }
 }
