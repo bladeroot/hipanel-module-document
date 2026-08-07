@@ -17,6 +17,13 @@ class DocumentSearch extends Document
 {
     use SearchModelTrait;
 
+    public function rules(): array
+    {
+        return array_merge(parent::rules(), [
+            [['charge_ids'], 'safe'],
+        ]);
+    }
+
     /**
      * {@inheritdoc}
      */
