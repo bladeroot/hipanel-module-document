@@ -118,7 +118,7 @@ $this->params['breadcrumbs'][] = $this->title;
 $totals = [];
 foreach ($charges as $charge) {
     $currency = $charge->currency;
-    $totals[$currency] = ($totals[$currency] ?? 0.0) + (float)$charge->sum;
+    $totals[$currency] = bcadd($totals[$currency] ?? '0', (string)$charge->sum, 4);
 }
 ?>
 <div class="row">
