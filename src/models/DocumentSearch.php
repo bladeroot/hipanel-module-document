@@ -15,12 +15,14 @@ use Yii;
 
 class DocumentSearch extends Document
 {
-    use SearchModelTrait;
+    use SearchModelTrait {
+        SearchModelTrait::searchAttributes as defaultSearchAttributes;
+    }
 
-    public function rules(): array
+    public function searchAttributes(): array
     {
-        return array_merge(parent::rules(), [
-            [['charge_ids'], 'safe'],
+        return array_merge($this->defaultSearchAttributes(), [
+            'charge_ids',
         ]);
     }
 
