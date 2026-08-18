@@ -113,7 +113,7 @@ $this->params['breadcrumbs'][] = $this->title;
 </div>
 
 <?php $charges = $model->chargeModels; ?>
-<?php if (!empty($charges)): ?>
+<?php if (Yii::$app->user->can('bill.charges.read') && !empty($charges)): ?>
 <?php
 $totals = [];
 foreach ($charges as $charge) {
@@ -152,6 +152,7 @@ foreach ($charges as $charge) {
                 'quantity',
                 'is_payed',
                 'time',
+                'included_in_documents',
             ],
         ]) ?>
         <?php $box->endBody() ?>
